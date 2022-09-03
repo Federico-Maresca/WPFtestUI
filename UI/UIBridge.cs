@@ -26,7 +26,7 @@ class UIBridge
         gui_thread = new Thread(() =>
         {
             mainview_ui = new MainView(parentthread)
-            { Opacity = 0, Width = 1280, Height = 720 };
+            { Opacity = 1, Width = 1280, Height = 720 };
             mainview_ui.Show();
             mainview_handle = new WindowInteropHelper(mainview_ui).Handle;
             System.Windows.Threading.Dispatcher.Run();
@@ -51,7 +51,9 @@ class UIBridge
     {
         try
         {
+
             mainview_ui.Show();
+            mainview_ui.ShowInTaskbar = true;
             //mainview_ui.Opacity = 1;
             //mainview_ui.Width = 1280 ;
             //mainview_ui.Height = 720;
@@ -59,8 +61,9 @@ class UIBridge
         catch /// Can't Access to UI Thread, So Dispatching
         {
             mainview_ui.Dispatcher.BeginInvoke((Action)(() => {
+
                 mainview_ui.Show();
-                mainview_ui.Opacity = 1;
+                mainview_ui.ShowInTaskbar = true;
             }));
         }
     }
@@ -85,6 +88,7 @@ class UIBridge
         try
         {
             mainview_ui.Hide();
+            mainview_ui.ShowInTaskbar = false;
         }
         catch /// Can't Access to UI Thread, So Dispatching
         {

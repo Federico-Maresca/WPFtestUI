@@ -9,15 +9,15 @@
 using namespace std;
 
 typedef HWND(*CreateUserInterfaceFunc)(DWORD);
-CreateUserInterfaceFunc CreateUserInterface;
+CreateUserInterfaceFunc CreateUserInterface = nullptr;
 typedef void(*DisplayUserInterfaceFunc)(void);
-DisplayUserInterfaceFunc DisplayUserInterface;
+DisplayUserInterfaceFunc DisplayUserInterface = nullptr;
 typedef void(*DestroyUserInterfaceFunc)(void);
-DestroyUserInterfaceFunc DestroyUserInterface;
+DestroyUserInterfaceFunc DestroyUserInterface = nullptr;
 typedef void(*HideUserInterfaceFunc)(void);
-HideUserInterfaceFunc HideUserInterface;
+HideUserInterfaceFunc HideUserInterface = nullptr;
 typedef int(*UpdateProgressFunc)(void);
-UpdateProgressFunc UpdateProgress;
+UpdateProgressFunc UpdateProgress = nullptr;
 //// Global Objects
 WNDCLASSEX HostWindowClass; /// Our Host Window Class Object
 MSG loop_message; /// Loop Message for Host Window
@@ -45,6 +45,7 @@ void print() {
 		minpercent--;
 		if (minpercent == 0) {
 			UpdateProgress();
+			::Sleep(100);
 			minpercent = percentVAl;
 			count++;
 		}
@@ -55,7 +56,7 @@ void print() {
 void sendint(int pamount) {
 	amount = pamount;
 	HideUserInterface();
-	//::Sleep(2000);
+	::Sleep(2000);
 	DisplayUserInterface();
 }
 
@@ -90,7 +91,7 @@ LRESULT CALLBACK HostWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 	}
 	return 0;
 }
-//// Our Application Entry Point
+// Our Application Entry Point
 int main()
 {
 	cout << "C++ Main App Started..." << endl;
@@ -216,3 +217,118 @@ int main()
 		DispatchMessage(&loop_message);
 	}
 }
+
+BOOL rpCurrSide;
+BOOL rpCurrFid;
+BOOL rTopPass[3] = { FALSE,FALSE, FALSE };
+BOOL rBtmPass[3] = { FALSE,FALSE, FALSE };
+BOOL rTopPassAuto[3] = { TRUE,TRUE, FALSE };
+BOOL rBtmPassAuto[3] = { TRUE,FALSE, FALSE };
+BOOL align(BOOL force) {
+	BOOL rValue;
+	if (force)
+		if (rpCurrSide)
+			rTopPass[rpCurrFid] = TRUE;
+		else
+			rBtmPass[rpCurrFid] = TRUE;
+	else
+		if (rpCurrSide)
+			rTopPass[rpCurrFid] = rTopPassAuto[rpCurrFid];
+		else
+			rBtmPass[rpCurrFid] = rBtmPassAuto[rpCurrFid];
+	rValue = rpCurrSide ? rTopPass[rpCurrFid] : rBtmPass[rpCurrFid];
+
+	return rValue;
+}
+
+BOOL alignarea(BOOL pIsTop, BOOL pIsBtm) {
+	int currFid;
+	int maxFid = 3;
+	BOOL rIsTop = pIsTop;
+	BOOL rIsBtm = pIsBtm;
+	BOOL rForceTop = FALSE;
+	BOOL rForceBtm = FALSE;
+	BOOL rSuccess = FALSE;
+	BOOL rManual = TRUE;
+	BOOL rReset = FALSE;
+	BOOL rpSkipBoard = FALSE;
+	BOOL rpExit = FALSE;
+	for (rpCurrFid = 0; rpCurrFid < maxFid; rpCurrFid++)
+	{
+
+		if (rIsTop && (!rTopPass[rpCurrFid] || rForceTop ) ) {
+			rpCurrSide = TRUE;
+			rSuccess = align(rForceTop);
+			std::cout << rpCurrFid << " TOP" << (!rSuccess ? " FAIL" : (rForceTop ? " LEARN" : " AUTOPASS") ) << std::endl;
+			//Entered only the first time that a fiducial fails, starts manual align of
+			//that area side.
+			if (!rSuccess && !rForceTop && rManual) {
+				rForceTop = TRUE;
+				//If the other side is already in manual, give priority to that side
+				//otherwise reset fiducial count
+				if (rForceTop && rForceBtm) {
+					rIsTop = FALSE;
+				}
+				else {
+					rReset = TRUE;
+				}
+			}
+
+		}
+
+		if (rpSkipBoard || rpExit) {
+			//CLOSE MANUAL ALIGN WINDOW
+			//FAIL BOARD
+			if (rpExit)
+				//TODO invalidate all results
+			break;
+		}
+		if (rIsBtm && ( !rBtmPass[rpCurrFid] || rForceBtm) ) {
+			rpCurrSide = FALSE;
+			rSuccess = align(rForceBtm);
+
+			std::cout << rpCurrFid << " BTM" << (!rSuccess ? " FAIL" : (rForceBtm ? " LEARN" : " AUTOPASS")) << std::endl;
+			//Entered only the first time that a fiducial fails, starts manual align of
+			//that area side.
+			if (!rSuccess && !rForceBtm && rManual) {
+				rForceBtm = TRUE;
+				//If the other side is already in manual, give priority to that side
+				//otherwise reset fiducial count
+				if (rForceTop && rForceBtm) {
+					rIsBtm = FALSE;
+				}
+				else {
+					rReset = TRUE;
+				}
+			}
+
+		}
+		if (rpSkipBoard || rpExit) {
+			//CLOSE MANUAL ALIGN WINDOW
+			//FAIL BOARD
+			if(rpExit)
+				//TODO invalidate all results
+			break;
+		}
+		if (rForceTop && rForceBtm && (rpCurrFid == maxFid - 1) && !rReset) {
+			rIsTop = !rIsTop;
+			rIsBtm = !rIsBtm;
+			rForceTop = rIsTop;
+			rForceBtm = rIsBtm;
+			rpCurrFid = -1;
+		}
+		
+		if (rReset) {
+			rpCurrFid = -1;
+			rReset = FALSE;
+		}
+	}
+	return TRUE;
+}
+
+//int main() {
+//	rpCurrSide = TRUE;
+//	alignarea(TRUE, TRUE);
+//	getchar();
+//	return 0;
+//}
