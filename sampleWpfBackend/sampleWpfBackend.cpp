@@ -45,7 +45,6 @@ void print() {
 		minpercent--;
 		if (minpercent == 0) {
 			UpdateProgress();
-			::Sleep(100);
 			minpercent = percentVAl;
 			count++;
 		}

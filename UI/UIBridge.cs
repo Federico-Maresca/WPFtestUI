@@ -49,68 +49,71 @@ class UIBridge
     [DllExport]
     static public void DisplayUserInterface() /// Multi-Threaded Version
     {
-        try
-        {
+    //    try
+    //    {
 
-            mainview_ui.Show();
-            mainview_ui.ShowInTaskbar = true;
-            //mainview_ui.Opacity = 1;
-            //mainview_ui.Width = 1280 ;
-            //mainview_ui.Height = 720;
-    }
-        catch /// Can't Access to UI Thread, So Dispatching
-        {
+    //        mainview_ui.Show();
+    //        mainview_ui.ShowInTaskbar = true;
+    //        //mainview_ui.Opacity = 1;
+    //        //mainview_ui.Width = 1280 ;
+    //        //mainview_ui.Height = 720;
+    //}
+    //    catch /// Can't Access to UI Thread, So Dispatching
+    //    {
             mainview_ui.Dispatcher.BeginInvoke((Action)(() => {
 
                 mainview_ui.Show();
                 mainview_ui.ShowInTaskbar = true;
             }));
-        }
+       // }
     }
 
     [DllExport]
     static public void DestroyUserInterface() /// Multi-Threaded Version
     {
-        try
-        {
-            mainview_ui.Close();
-        }
-        catch /// Can't Access to UI Thread, So Dispatching
-        {
+        //try
+        //{
+        //    mainview_ui.Close();
+        //}
+        //catch /// Can't Access to UI Thread, So Dispatching
+        //{
             mainview_ui.Dispatcher.BeginInvoke((Action)(() => {
                 mainview_ui.Close();
             }));
-        }
+       // }
     }
     [DllExport]
     static public void HideUserInterface() /// Multi-Threaded Version
     {
-        try
-        {
-            mainview_ui.Hide();
-            mainview_ui.ShowInTaskbar = false;
-        }
-        catch /// Can't Access to UI Thread, So Dispatching
-        {
+        //try
+        //{
+        //    mainview_ui.Hide();
+        //    mainview_ui.ShowInTaskbar = false;
+        //}
+        //catch /// Can't Access to UI Thread, So Dispatching
+        //{
             mainview_ui.Dispatcher.BeginInvoke((Action)(() => {
                 mainview_ui.Hide();
             }));
-        }
+        //}
     }
 
     [DllExport]
     static public void UpdateProgress() /// Multi-Threaded Version
     {
-        try
-        {
-            mainview_ui.UpdateStatus();
-        }
-        catch /// Can't Access to UI Thread, So Dispatching
-        {
+        //try
+        //{
+        //    mainview_ui.UpdateStatus();
+        //    Thread.Sleep(1);
+        //}
+        //catch /// Can't Access to UI Thread, So Dispatching
+        //{
             mainview_ui.Dispatcher.BeginInvoke((Action)(() => {
                 mainview_ui.UpdateStatus();
             }));
-        }
+
+        Thread.Sleep(10);
+        // }
     }
 
 
