@@ -55,7 +55,7 @@ void print() {
 void sendint(int pamount) {
 	amount = pamount;
 	HideUserInterface();
-	//::Sleep(2000);
+	::Sleep(2000);
 	DisplayUserInterface();
 }
 

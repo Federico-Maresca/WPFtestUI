@@ -17,12 +17,15 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <Button Grid.Column="0"  Content="Print" HorizontalAlignment="Center" VerticalAlignment="Center" Height="434" Width="400" Click="Print_Click"  />
         <Button Grid.Column="1"  Content="Send" HorizontalAlignment="Center" VerticalAlignment="Center" Height="434" Width="400"   Click="Send_Click" />
+        <ProgressBar  Grid.Column="2" Height="10" Width="100" Maximum="100" IsIndeterminate="False" Name="pbStatus"/>
+
 
     </Grid>
 </Window>

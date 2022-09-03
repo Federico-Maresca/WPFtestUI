@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -61,16 +62,18 @@ namespace UI.View
         const uint WM_SEND = 1026;
         public uint threadId;
         public uint threadIdMine;
-        delegate bool testprintptr(string filename);
+        delegate int GetProgressUpdatePtr();
         delegate bool testsendptr(string filename, long filesize);
         public IntPtr parentwindowfind;
         public IntPtr parentwindowmine;
         public int amount;
+        public int progress;
+        GetProgressUpdatePtr GetProgressUpdate;
         public MainView(uint parentthread)
         {
             InitializeComponent();
-            //testprint = (testprintptr)Marshal.GetDelegateForFunctionPointer
-            //        (api_1_ptr, typeof(testprintptr));
+            //GetProgressUpdate = (GetProgressUpdatePtr)Marshal.GetDelegateForFunctionPointer
+            //        (apiptr, typeof(GetProgressUpdatePtr));
             //testsend = (testsendptr)Marshal.GetDelegateForFunctionPointer
             //                      (api_2_ptr, typeof(testsendptr));
             amount = 1000;
@@ -94,11 +97,28 @@ namespace UI.View
 
         private void Print_Click(object sender, RoutedEventArgs e)
         {
+            pbStatus.Value = 0;
             PostThreadMessage(threadId, WM_PRINT, UIntPtr.Zero, IntPtr.Zero);
-           // SendMessage(parentwindowfind, WM_PRINT, IntPtr.Zero, IntPtr.Zero);
+
+
+            //Task.Factory.StartNew(() =>
+            //{
+            //    while (progress<= 100)
+            //    {
+            //        Dispatcher.Invoke(() =>
+            //        {
+            //            pbStatus.Value = progress;
+            //            Thread.Sleep(10);
+            //        });
+            //    }
+            //});
+            // SendMessage(parentwindowfind, WM_PRINT, IntPtr.Zero, IntPtr.Zero);
 
         }
-
+        public void UpdateStatus()
+        {
+            pbStatus.Value++;
+        }
         private void Send_Click(object sender, RoutedEventArgs e)
         {
 
@@ -106,5 +126,8 @@ namespace UI.View
             PostThreadMessage(threadId, WM_SEND, UIntPtr.Zero, send);
             //SendMessage(parentwindowfind, WM_SEND, IntPtr.Zero, send);
         }
+
+
     }
 }
+

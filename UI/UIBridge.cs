@@ -94,4 +94,20 @@ class UIBridge
         }
     }
 
+    [DllExport]
+    static public void UpdateProgress() /// Multi-Threaded Version
+    {
+        try
+        {
+            mainview_ui.UpdateStatus();
+        }
+        catch /// Can't Access to UI Thread, So Dispatching
+        {
+            mainview_ui.Dispatcher.BeginInvoke((Action)(() => {
+                mainview_ui.UpdateStatus();
+            }));
+        }
+    }
+
+
 }
