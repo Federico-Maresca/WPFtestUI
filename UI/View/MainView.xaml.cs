@@ -81,8 +81,6 @@ namespace UI.View
             threadId = parentthread;
         }
 
-
-
         public void MyFindWindow()
         {
 

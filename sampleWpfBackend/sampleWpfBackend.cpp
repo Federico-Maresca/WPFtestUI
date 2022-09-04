@@ -89,7 +89,7 @@ LRESULT CALLBACK HostWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 	return 0;
-}
+}/*
 // Our Application Entry Point
 int main()
 {
@@ -215,133 +215,146 @@ int main()
 		TranslateMessage(&loop_message);
 		DispatchMessage(&loop_message);
 	}
+}*/
+
+BOOL rpCurrSide;
+BOOL rpCurrFid;
+BOOL rTopPass[3] = { FALSE,FALSE, FALSE };
+BOOL rBtmPass[3] = { FALSE,FALSE, FALSE };
+BOOL rTopPassAuto[3] = { TRUE,TRUE, TRUE };
+BOOL rBtmPassAuto[3] = { TRUE,TRUE, FALSE };
+BOOL rManual = TRUE;
+BOOL rAuto = TRUE;
+
+
+BOOL align(BOOL force) {
+	BOOL rValue;
+	if (force)
+		if (rpCurrSide)
+			rTopPass[rpCurrFid] = TRUE;
+		else
+			rBtmPass[rpCurrFid] = TRUE;
+	else
+		if (rpCurrSide)
+			rTopPass[rpCurrFid] = rTopPassAuto[rpCurrFid];
+		else
+			rBtmPass[rpCurrFid] = rBtmPassAuto[rpCurrFid];
+	rValue = rpCurrSide ? rTopPass[rpCurrFid] : rBtmPass[rpCurrFid];
+
+	return rValue;
+}
+
+BOOL alignW(BOOL force) {
+	BOOL rSuccess = FALSE;
+	if (!rManual)
+		rSuccess = align(FALSE);
+	else {
+
+	}
+
+	std::cout << rpCurrFid << " TOP" << (!rSuccess ? " FAIL" : (force ? " LEARN" : " AUTOPASS")) << std::endl;
+	return rSuccess;
+}
+BOOL alignarea(BOOL pIsTop, BOOL pIsBtm) {
+	int maxFid = 3;
+	BOOL rIsTop = pIsTop;
+	BOOL rIsBtm = pIsBtm;
+
+	BOOL rForceTop = FALSE;
+	BOOL rForceBtm = FALSE;
+	BOOL rSuccess = FALSE;
+	BOOL rReset = FALSE;
+	BOOL rpSkipBoard = FALSE;
+	BOOL rpExit = FALSE;
+
+	if (rManual && !rAuto) {
+		rForceTop = pIsTop;
+		rForceBtm = pIsBtm;
+		if (pIsTop && pIsBtm)
+			rIsBtm = FALSE;
+	}
+	for (rpCurrFid = 0; rpCurrFid < maxFid; rpCurrFid++)
+	{
+		if (rIsTop && (!rTopPass[rpCurrFid] || rForceTop)) {
+			rpCurrSide = TRUE;
+			rSuccess = align(rForceTop);
+			std::cout << rpCurrFid << " TOP" << (!rSuccess ? " FAIL" : (rForceTop ? " LEARN" : " AUTOPASS")) << std::endl;
+			//Entered only the first time that a fiducial fails, starts manual align of
+			//that area side.
+			if (rSuccess) {
+
+			}
+			else if (rManual && !rForceTop) {
+				rForceBtm = TRUE;
+				//If the other side is already in manual, give priority to that side
+				//otherwise reset fiducial count
+				if (rForceBtm)
+					rIsTop = FALSE;
+				else
+					rReset = TRUE;
+			}
+		}
+
+		if (rpSkipBoard || rpExit) {
+			//CLOSE MANUAL ALIGN WINDOW
+			//FAIL BOARD
+			if (rpExit)
+				//TODO invalidate all results
+				break;
+		}
+		if (rIsBtm && (!rBtmPass[rpCurrFid] || rForceBtm)) {
+			rpCurrSide = FALSE;
+			rSuccess = align(rForceBtm);
+
+			std::cout << rpCurrFid << " BTM" << (!rSuccess ? " FAIL" : (rForceBtm ? " LEARN" : " AUTOPASS")) << std::endl;
+			//Entered only the first time that a fiducial fails, starts manual align of
+			//that area side.
+			if (rSuccess) {
+
+			}
+			else if (rManual && !rForceBtm) {
+				rForceBtm = TRUE;
+				//If the other side is already in manual, give priority to that side
+				//otherwise reset fiducial count
+				if (rForceTop)
+					rIsBtm = FALSE;
+				else
+					rReset = TRUE;
+			}
+
+		}
+		if (rpSkipBoard || rpExit) {
+			//CLOSE MANUAL ALIGN WINDOW
+			//FAIL BOARD
+			if (rpExit)
+				//TODO invalidate all results
+				break;
+		}
+
+		//If BOTH sides are MANUAL and ONE side's fiducials have been LEARNT 
+		if (!rReset && ((rpCurrFid == maxFid - 1) && rForceTop && rForceBtm)) {
+			rIsTop = ~rIsTop;
+			rIsBtm = ~rIsBtm;
+			rForceTop = rIsTop;
+			rForceBtm = rIsBtm;
+			rpCurrFid = -1;
+		}
+		else if (rReset) {
+			rpCurrFid = -1;
+			rReset = FALSE;
+		}
+	}
+	return TRUE;
+}
+
+int main() {
+	rpCurrSide = TRUE;
+	alignarea(TRUE, TRUE);
+	getchar();
+	return 0;
 }
 //
-//BOOL rpCurrSide;
-//BOOL rpCurrFid;
-//BOOL rTopPass[3] = { FALSE,FALSE, FALSE };
-//BOOL rBtmPass[3] = { FALSE,FALSE, FALSE };
-//BOOL rTopPassAuto[3] = { TRUE,TRUE, TRUE };
-//BOOL rBtmPassAuto[3] = { TRUE,TRUE, FALSE };
-//BOOL rManual = TRUE;
-//BOOL rAuto = TRUE;
-//BOOL align(BOOL force) {
-//	BOOL rValue;
-//	if (force)
-//		if (rpCurrSide)
-//			rTopPass[rpCurrFid] = TRUE;
-//		else
-//			rBtmPass[rpCurrFid] = TRUE;
-//	else
-//		if (rpCurrSide)
-//			rTopPass[rpCurrFid] = rTopPassAuto[rpCurrFid];
-//		else
-//			rBtmPass[rpCurrFid] = rBtmPassAuto[rpCurrFid];
-//	rValue = rpCurrSide ? rTopPass[rpCurrFid] : rBtmPass[rpCurrFid];
-//
-//	return rValue;
-//}
-//
-//BOOL alignW(BOOL force) {
-//	BOOL rSuccess;
-//	if (!rManual)
-//		rSuccess = align(FALSE);
-//	else {
-//
-//	}
-//
-//	std::cout << rpCurrFid << " TOP" << (!rSuccess ? " FAIL" : (force ? " LEARN" : " AUTOPASS")) << std::endl;
-//	return rSuccess;
-//}
-//BOOL alignarea(BOOL pIsTop, BOOL pIsBtm) {
-//	int currFid;
-//	int maxFid = 3;
-//	BOOL rIsTop = pIsTop;
-//	BOOL rIsBtm = pIsBtm;
-//
-//	BOOL rForceTop = FALSE;
-//	BOOL rForceBtm = FALSE;
-//	BOOL rSuccess = FALSE;
-//	BOOL rReset = FALSE;
-//	BOOL rpSkipBoard = FALSE;
-//	BOOL rpExit = FALSE;
-//
-//	if (rManual && !rAuto) {
-//		rForceTop = pIsTop;
-//		rForceBtm = pIsBtm;
-//		if (pIsTop && pIsBtm)
-//			rIsBtm = FALSE;
-//	}
-//	for (rpCurrFid = 0; rpCurrFid < maxFid; rpCurrFid++)
-//	{
-//		if (rIsTop && (!rTopPass[rpCurrFid] || rForceTop)) {
-//			rpCurrSide = TRUE;
-//			rSuccess = align(rForceTop);
-//			std::cout << rpCurrFid << " TOP" << (!rSuccess ? " FAIL" : (rForceTop ? " LEARN" : " AUTOPASS")) << std::endl;
-//			//Entered only the first time that a fiducial fails, starts manual align of
-//			//that area side.
-//			if (rManual && !rForceTop && !rSuccess) {
-//				rForceTop = TRUE;
-//				//If the other side is already in manual, give priority to that side
-//				//otherwise reset fiducial count
-//				if (rForceTop && rForceBtm)
-//					rIsTop = FALSE;
-//				else
-//					rReset = TRUE;
-//			}
-//		}
-//
-//		if (rpSkipBoard || rpExit) {
-//			//CLOSE MANUAL ALIGN WINDOW
-//			//FAIL BOARD
-//			if (rpExit)
-//				//TODO invalidate all results
-//				break;
-//		}
-//		if (rIsBtm && (!rBtmPass[rpCurrFid] || rForceBtm)) {
-//			rpCurrSide = FALSE;
-//			rSuccess = align(rForceBtm);
-//
-//			std::cout << rpCurrFid << " BTM" << (!rSuccess ? " FAIL" : (rForceBtm ? " LEARN" : " AUTOPASS")) << std::endl;
-//			//Entered only the first time that a fiducial fails, starts manual align of
-//			//that area side.
-//			if (rManual && !rForceBtm && !rSuccess) {
-//				rForceBtm = TRUE;
-//				//If the other side is already in manual, give priority to that side
-//				//otherwise reset fiducial count
-//				if (rForceTop && rForceBtm)
-//					rIsBtm = FALSE;
-//				else
-//					rReset = TRUE;
-//			}
-//		}
-//		if (rpSkipBoard || rpExit) {
-//			//CLOSE MANUAL ALIGN WINDOW
-//			//FAIL BOARD
-//			if (rpExit)
-//				//TODO invalidate all results
-//				break;
-//		}
-//
-//		//If BOTH sides are MANUAL and ONE side's fiducials have been LEARNT 
-//		if (!rReset && ((rpCurrFid == maxFid - 1) && rForceTop && rForceBtm) ) {
-//			rIsTop = !rIsTop;
-//			rIsBtm = !rIsBtm;
-//			rForceTop = rIsTop;
-//			rForceBtm = rIsBtm;
-//			rpCurrFid = -1;
-//		}
-//		else if (rReset) {
-//			rpCurrFid = -1;
-//			rReset = FALSE;
-//		}
-//	}
-//	return TRUE;
-//}
-//
-//int main() {
-//	rpCurrSide = TRUE;
-//	alignarea(TRUE, TRUE);
-//	getchar();
-//	return 0;
-//}
+//# First law
+//!(a&& b) == !a || !b
+//# Second law
+//!(a || b) == !a && !b
