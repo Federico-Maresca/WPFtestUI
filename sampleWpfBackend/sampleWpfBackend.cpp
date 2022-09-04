@@ -89,7 +89,7 @@ LRESULT CALLBACK HostWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 	return 0;
-}/*
+}
 // Our Application Entry Point
 int main()
 {
@@ -201,8 +201,10 @@ int main()
 	//ShowWindow(wpf_hwnd, SW_SHOW);
 	isHWindowRunning = true;
 	/// Adding Message Loop
-	while (GetMessage(&loop_message, NULL, 0, 0) > 0 && isHWindowRunning)
+	while (isHWindowRunning && GetMessage(&loop_message, NULL, 0, 0) > 0  )
 	{
+		TranslateMessage(&loop_message);
+		DispatchMessage(&loop_message);
 		switch (loop_message.message)
 		{
 		case 1025:
@@ -211,11 +213,15 @@ int main()
 		case 1026:
 			sendint((int)loop_message.lParam);
 			break;
+		case 1027:
+			DestroyUserInterface();
+			isHWindowRunning = false;
+			break;
 		}
-		TranslateMessage(&loop_message);
-		DispatchMessage(&loop_message);
 	}
-}*/
+	getchar();
+	return 0;
+}/*
 
 BOOL rpCurrSide;
 BOOL rpCurrFid;
@@ -352,7 +358,7 @@ int main() {
 	alignarea(TRUE, TRUE);
 	getchar();
 	return 0;
-}
+}*/
 //
 //# First law
 //!(a&& b) == !a || !b

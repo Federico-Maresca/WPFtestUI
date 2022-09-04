@@ -80,7 +80,7 @@ class UIBridge
             mainview_ui.Dispatcher.BeginInvoke((Action)(() => {
                 mainview_ui.Close();
             }));
-       // }
+        // }
     }
     [DllExport]
     static public void HideUserInterface() /// Multi-Threaded Version

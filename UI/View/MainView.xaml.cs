@@ -60,6 +60,7 @@ namespace UI.View
 
         const uint WM_PRINT = 1025;
         const uint WM_SEND = 1026;
+        const uint WM_EXIT = 1027;
         public uint threadId;
         public uint threadIdMine;
         delegate int GetProgressUpdatePtr();
@@ -125,7 +126,10 @@ namespace UI.View
             //SendMessage(parentwindowfind, WM_SEND, IntPtr.Zero, send);
         }
 
-
+        private void Exit_Click(object sender, RoutedEventArgs e)
+        {
+            PostThreadMessage(threadId, WM_EXIT, UIntPtr.Zero, IntPtr.Zero);
+        }
     }
 }
 
